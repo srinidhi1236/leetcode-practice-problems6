@@ -1,0 +1,45 @@
+class Solution:
+    def earliestFinishTime(self, landStartTime, landDuration, waterStartTime, waterDuration):
+
+        def solve(a, da, b, db):
+            rides = sorted(zip(b, db))
+            starts = [x[0] for x in rides]
+            n = len(rides)
+
+            pre = [0] * n
+            pre[0] = rides[0][1]
+
+            for i in range(1, n):
+                pre[i] = min(pre[i - 1], rides[i][1])
+
+            suf = [0] * n
+            suf[-1] = rides[-1][0] + rides[-1][1]
+
+            for i in range(n - 2, -1, -1):
+                suf[i] = min(suf[i + 1], rides[i][0] + rides[i][1])
+
+            ans = float('inf')
+
+            for s, d in zip(a, da):
+                end = s + d
+
+                lo, hi = 0, n - 1
+                while lo <= hi:
+                    mid = (lo + hi) // 2
+                    if starts[mid] <= end:
+                        lo = mid + 1
+                    else:
+                        hi = mid - 1
+
+                if hi >= 0:
+                    ans = min(ans, end + pre[hi])
+
+                if hi + 1 < n:
+                    ans = min(ans, suf[hi + 1])
+
+            return ans
+
+        return min(
+            solve(landStartTime, landDuration, waterStartTime, waterDuration),
+            solve(waterStartTime, waterDuration, landStartTime, landDuration)
+        )
